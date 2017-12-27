@@ -1,0 +1,11 @@
+__pycache__
+positives/images/*.png
+positives/startfrom
+positives/apikey
+negatives/img-pg/*.png
+negatives/tiles/*.png
+negatives/pdfs/*.pdf
+tensorboard
+.ipynb_checkpoints
+checkpoint
+model.ckpt*
