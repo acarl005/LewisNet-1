@@ -30,6 +30,11 @@ This project is the first step. It can classify Lewis structures from *non* Lewi
 The positives were gathered from the [ChemSpider API](http://www.chemspider.com/).
 I downloaded the first 10,000 images (by ascending integer ID).
 Negatives were taken from papers without chemical structures in them, also about 10,000 images.
+Papers were converted to PNGs and cropped into 150x150 tiles.
+
+## Training
+
+The network was trained on a 2015 Macbook Pro with an Intel i7 CPU.
 
 ## Architecture
 
