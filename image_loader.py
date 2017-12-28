@@ -35,12 +35,12 @@ def resize_image(im):
     newIm = Image.new("L", size=(150, 150), color=255)
     if (aspect_ratio > 1):
         im = im.resize((150, floor(150 / aspect_ratio)), Image.ANTIALIAS)
-        margin = floor((150 - im.size[1]) / 2)
-        newIm.paste(im, (0, margin, 150, 150 - margin))
+        margin = (150 - im.size[1]) / 2
+        newIm.paste(im, (0, floor(margin), 150, floor(150 - margin)))
     else:
         im = im.resize((floor(150 * aspect_ratio), 150), Image.ANTIALIAS)
-        margin = floor((150 - im.size[0]) / 2)
-        newIm.pase(im, (margin, 0, 150 - margin, 150))
+        margin = (150 - im.size[0]) / 2
+        newIm.paste(im, (floor(margin), 0, floor(150 - margin), 150))
     return newIm
 
 def alpha_to_white(im):
