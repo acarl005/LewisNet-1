@@ -18,7 +18,7 @@ predictions = tf.argmax(model.logits, axis=1)
 saver = tf.train.Saver()
 
 files = sys.argv[1:]
-imgs = load_images(files)
+imgs = load_images(files, resize=True, remove_alpha=True)
 
 with tf.Session() as sess:
     saver.restore(sess, "./model.ckpt")
