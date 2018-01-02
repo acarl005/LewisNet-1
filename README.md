@@ -27,10 +27,11 @@ This project is the first step. It can classify Lewis structures from *non* Lewi
 
 ## Data Gathering
 
-The positives were gathered from the [ChemSpider API](http://www.chemspider.com/).
+Some of the positives were gathered from the [ChemSpider API](http://www.chemspider.com/).
 I downloaded the first 10,000 images (by ascending integer ID).
-Negatives were taken from papers without chemical structures in them, also about 10,000 images.
+Some of the negatives were taken from papers without chemical structures in them, about 9,000 images.
 Papers were converted to PNGs and cropped into 150x150 tiles.
+For each class, several thousand were downloaded and labelled manually from Google images.
 
 ## Training
 
