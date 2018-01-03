@@ -9,5 +9,4 @@ negatives/manually-collected/*.png
 negatives/pdfs/*.pdf
 tensorboard
 .ipynb_checkpoints
-checkpoint
-model.ckpt*
+tensorflow-ckpt
