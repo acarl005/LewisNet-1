@@ -8,7 +8,7 @@ A convolutional neural network for recognizing Organic Chemical Lewis Structures
 ![molecule-9](./readme-img/9.png)
 ![molecule-19](./readme-img/19.png)
 
-This is modified from the [AlexNet](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) architecture.
+This is modified from the [AlexNet](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) architecture, with similar modifications to [this paper](https://arxiv.org/pdf/1311.2901.pdf).
 
 99% accuracy was achieved on the test set with only 3 epochs.
 

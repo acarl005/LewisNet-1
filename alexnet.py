@@ -13,14 +13,14 @@ class AlexNet:
     def _create(self):
         """Create the computation graph in tensorflow"""
         # 1st layer: Conv -> ReLU -> LRN -> MaxPool
-        conv1 = tf.layers.conv2d(self.X, filters=96, kernel_size=(7, 7), strides=4, activation=tf.nn.relu, name="conv1") # 23x23
+        conv1 = tf.layers.conv2d(self.X, filters=96, kernel_size=(7, 7), strides=4, activation=tf.nn.relu, name="conv1") # 36x36
         norm1 = lrn(conv1, 2, 1e-05, 0.75, name="norm1")
-        pool1 = tf.layers.max_pooling2d(norm1, pool_size=(3, 3), strides=2, name="pool1") # 23x23
+        pool1 = tf.layers.max_pooling2d(norm1, pool_size=(3, 3), strides=2, name="pool1") # 17x17
 
         # 2nd layer: Conv -> ReLU -> LRN -> MaxPool
-        conv2 = tf.layers.conv2d(pool1, filters=256, kernel_size=(5, 5), padding="SAME", activation=tf.nn.relu, name="conv2") # 23x23
+        conv2 = tf.layers.conv2d(pool1, filters=256, kernel_size=(5, 5), padding="SAME", activation=tf.nn.relu, name="conv2") # 17x17
         norm2 = lrn(conv2, 2, 1e-05, 0.75, name="norm2")
-        pool2 = tf.layers.max_pooling2d(norm2, pool_size=(3, 3), strides=2, name="pool2") # 11x11
+        pool2 = tf.layers.max_pooling2d(norm2, pool_size=(3, 3), strides=2, name="pool2") # 8x8
 
         # 3rd layer: Conv -> ReLU
         conv3 = tf.layers.conv2d(pool2, filters=384, kernel_size=(3, 3), padding="SAME", activation=tf.nn.relu, name="conv3")
@@ -29,8 +29,8 @@ class AlexNet:
         conv4 = tf.layers.conv2d(conv3, filters=384, kernel_size=(3, 3), padding="SAME", activation=tf.nn.relu, name="conv4")
 
         # 5th layer: Conv -> ReLU => MaxPool
-        conv5 = tf.layers.conv2d(conv4, filters=256, kernel_size=(3, 3), padding="SAME", activation=tf.nn.relu, name="conv5")
-        pool5 = tf.layers.max_pooling2d(conv5, pool_size=(3, 3), strides=2, name="pool5") # 5x5
+        conv5 = tf.layers.conv2d(conv4, filters=256, kernel_size=(3, 3), padding="SAME", activation=tf.nn.relu, name="conv5") # 8x8
+        pool5 = tf.layers.max_pooling2d(conv5, pool_size=(3, 3), strides=2, name="pool5") # 3x3
 
         pool5_shape = pool5.get_shape()
         size_fc_layer = pool5_shape[1] * pool5_shape[2] * pool5_shape[3]
