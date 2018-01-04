@@ -39,11 +39,20 @@ The network was trained on a 2015 Macbook Pro with an Intel i7 CPU.
 
 ## Hidden Layer Visualizations
 
-Here we find the top 9 pieces of the input space that maximize activation in each filter. This gives us an idea what each filter is "looking for".
+Here we find the top 9 pieces of the input space that maximize activation in each filter. This gives us an idea what each filter is "looking for". The negatives were excluded in this visualization.
 
 ### Hidden layer 1
+
+This layer appears to be detecting simple things like curves, edges, vertices, and individual letters/numbers.
+
 ![layer1](./readme-img/layer1.png)
+
+This layer is detecting more complex things like methyl groups, allyl groups, quaternary carbons, aromatic rings, amines, carbonyls, etc.
+Notice that quite a few of the units are all blank, meaning there was no activation whatsoever for all the positive images. These units are probably stimulated by salient features in the negatives.
 
 ### Hidden layer 2
 ![layer2](./readme-img/layer2.png)
 
+### Hidden layer 3
+
+Coming soon!
