@@ -37,7 +37,13 @@ For each class, several thousand were downloaded and labelled manually from Goog
 
 The network was trained on a 2015 Macbook Pro with an Intel i7 CPU.
 
-## Architecture
+## Hidden Layer Visualizations
 
-![tensorflow-graph](./readme-img/graph.png)
+Here we find the top 9 pieces of the input space that maximize activation in each filter. This gives us an idea what each filter is "looking for".
+
+### Hidden layer 1
+![layer1](./readme-img/layer1.png)
+
+### Hidden layer 2
+![layer2](./readme-img/layer2.png)
 
