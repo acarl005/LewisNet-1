@@ -32,6 +32,7 @@ I downloaded the first 10,000 images (by ascending integer ID).
 Some of the negatives were taken from papers without chemical structures in them, about 9,000 images.
 Papers were converted to PNGs and cropped into 150x150 tiles.
 For each class, several thousand were downloaded and labelled manually from Google images.
+This was done with a Chrome Extension called [Label Gun](https://github.com/acarl005/label-gun).
 
 ## Training
 
