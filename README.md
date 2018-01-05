@@ -1,7 +1,7 @@
 LewisNet-1
 ==========
 
-A convolutional neural network for recognizing Organic Chemical Lewis Structures build with Google's [Tensorflow](https://github.com/tensorflow/tensorflow).
+A convolutional neural network for recognizing Organic Chemical [Lewis Structures](https://en.wikipedia.org/wiki/Lewis_structure) and [Skeletal formulas](https://en.wikipedia.org/wiki/Skeletal_formula) build with Google's [Tensorflow](https://github.com/tensorflow/tensorflow).
 
 ![molecule-1](./readme-img/1.png)
 ![molecule-2](./readme-img/2.png)
@@ -22,7 +22,8 @@ This involves two steps:
 1. Object detection - find the location of chemical structures within papers
 1. Identification - not just classification, but determining the actual chemical formula
 
-This project is the first step. It can classify Lewis structures from *non* Lewis structures.
+This project is the first step.
+It can classify Lewis structures from *non* Lewis structures.
 
 
 ## Data Gathering
@@ -41,12 +42,17 @@ The network was trained on a Lenovo U31-70 with a NVIDIA GeForce 920M running Ub
 ## Hidden Layer Visualizations
 
 I'm using a technique from [Donahue et. al., 2013](https://arxiv.org/pdf/1310.1531.pdf).
-Here I find crops of the input space that maximize activation in higher layers.
+Here I find crops of the input image space that maximize activation in higher layers.
 This gives us an idea what each filter is "looking for".
 In this case, the top 9 patches are shown for each filter.
 The negatives were excluded in this visualization.
 
 ### Hidden layer 1
+
+The first conv layer has 96 filters.
+Here are the 864 images (9 * 96) that maximize the activations in the first layer.
+Each box in this grid is for one filter.
+Within the box are the 9 patches (crops) from the input images that produce the largest observed activations for that filter.
 
 This layer appears to be detecting simple things like curves, edges, vertices, and individual letters/numbers.
 
