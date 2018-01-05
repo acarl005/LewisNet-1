@@ -40,7 +40,11 @@ The network was trained on a Lenovo U31-70 with a NVIDIA GeForce 920M running Ub
 
 ## Hidden Layer Visualizations
 
-Here we find the top 9 pieces of the input space that maximize activation in each filter. This gives us an idea what each filter is "looking for". The negatives were excluded in this visualization.
+I'm using a technique from [Donahue et. al., 2013](https://arxiv.org/pdf/1310.1531.pdf).
+Here I find crops of the input space that maximize activation in higher layers.
+This gives us an idea what each filter is "looking for".
+In this case, the top 9 patches are shown for each filter.
+The negatives were excluded in this visualization.
 
 ### Hidden layer 1
 
@@ -48,12 +52,17 @@ This layer appears to be detecting simple things like curves, edges, vertices, a
 
 ![layer1](./readme-img/layer1.png)
 
-This layer is detecting more complex things like methyl groups, allyl groups, quaternary carbons, aromatic rings, amines, carbonyls, etc.
-Notice that quite a few of the units are all blank, meaning there was no activation whatsoever for all the positive images. These units are probably stimulated by salient features in the negatives.
-
 ### Hidden layer 2
+
+This layer is detecting more complex things like parts of rings, methyl groups, double bonds, quaternary carbons, amines, carbonyls, etc.
+Notice that quite a few of the units are all blank, meaning there was no activation whatsoever for all the positive images.
+These units are probably stimulated by salient features in the negatives.
+
 ![layer2](./readme-img/layer2.png)
 
 ### Hidden layer 3
 
-Coming soon!
+This layer detects even more complexity, like entire rings or polycycles, allyl groups, and other functional groups.
+
+![layer3](./readme-img/layer3.png)
+

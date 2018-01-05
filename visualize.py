@@ -23,6 +23,50 @@ def deconvolve_range(rng, filt_size, stride=1, pad=0):
     prev_end = max(0, end * stride + filt_size - pad - 1)
     return prev_start, prev_end
 
+def visualize_layer(hidden_layer, layer_number, deconvolve, figsize, subplot_layout, top_n=9):
+    """finds the argmax in the hidden layer, back tracks to the patch of image that caused the activation, and plots that patch"""
+    fig = plt.figure(figsize=figsize)
+    # this just tells us the max size of a patch from input space. we need this now to determine the size of the composite image
+    patch_range = deconvolve((0, 0), True)
+    patch_size = patch_range[1] - patch_range[0] + 1
+
+    # loop over the number of filters (a.k.a. number of channels)
+    for f in range(hidden_layer.shape[3]):
+        # get activations for the filter/channel we care about
+        activations = hidden_layer[:, :, :, f]
+        # the composite image is the 9 crops of the images put together into a single image. makes plotting easier
+        composite_grid_size = math.ceil(math.sqrt(top_n))
+        composite_pixel_size = (patch_size + 1) * composite_grid_size
+        composite_img = np.full((composite_pixel_size, composite_pixel_size), 255)
+        composite_img[composite_pixel_size - 1, composite_pixel_size - 1] = 0
+        # find locations and values of top n activations
+        kernel_argmax = largest_indices(activations, top_n)
+        kernel_max_values = activations[kernel_argmax]
+        for m in range(top_n):
+            val = kernel_max_values[m]
+            # if nothing activated it (all 0s), just show a white patch
+            if val == 0:
+                patch = np.full((patch_size, patch_size), 255)
+            else:
+                loc = [t[m] for t in kernel_argmax]
+                i = loc[0]
+                # back-track it to the location in the original image
+                # this is different for each layer, so the function to do this is passed in
+                j = deconvolve((loc[1], loc[1]))
+                k = deconvolve((loc[2], loc[2]))
+                # get that patch
+                patch = np.squeeze(imgs[i, j[0]:j[1]+1, k[0]:k[1]+1])
+                # because of padding in the convolutions/pooling, some of the images on the edges are smaller.
+                # use np.pad to fill that in with gray background
+                patch = np.pad(patch, ((0, patch_size - patch.shape[0]), (0, patch_size - patch.shape[1])), "constant", constant_values=128)
+            x, y = np.unravel_index(m, (composite_grid_size, composite_grid_size))
+            # add the patch to the composite
+            composite_img[x*(patch_size + 1):x*(patch_size + 1)+patch_size,
+                          y*(patch_size + 1):y*(patch_size + 1)+patch_size] = patch
+        sub = fig.add_subplot(subplot_layout[0], subplot_layout[1], f + 1)
+        sub.imshow(composite_img, cmap="gray")
+    fig.savefig("readme-img/layer{}.png".format(layer_number))
+
 # load the saved tensorflow model and evaluate a list of paths to PNG files (must be 150x150)
 num_classes = 1
 
@@ -44,84 +88,34 @@ imgs = load_images([
 with tf.Session() as sess:
     saver.restore(sess, "./tensorflow-ckpt/model.ckpt")
 
+    graph = tf.get_default_graph()
     # from our graph, get the tensors for our hidden layers
-    first_hidden_layer_tensor = tf.get_default_graph().get_tensor_by_name("conv1/Relu:0")
-    second_hidden_layer_tensor = tf.get_default_graph().get_tensor_by_name("conv2/Relu:0")
-    first_hidden_layer, second_hidden_layer = sess.run([ first_hidden_layer_tensor, second_hidden_layer_tensor ], feed_dict={X: imgs, dropout: 0})
+    first_hidden_layer_tensor = graph.get_tensor_by_name("conv1/Relu:0")
+    second_hidden_layer_tensor = graph.get_tensor_by_name("conv2/Relu:0")
+    third_hidden_layer_tensor = graph.get_tensor_by_name("conv3/Relu:0")
 
-    # get the 9 strongest activations
-    top_n = 9
+    first_hidden_layer, second_hidden_layer, third_hidden_layer = sess.run((first_hidden_layer_tensor,
+                                                                            second_hidden_layer_tensor,
+                                                                            third_hidden_layer_tensor),
+                                                                           feed_dict={X: imgs, dropout: 0})
 
-    fig1 = plt.figure(figsize=(9, 13))
+    def deconvolve_layer_1(rng, ignore_pad=False):
+        return deconvolve_range(rng, filt_size=7, stride=4)
 
-    # determine how big the image patch is from the first layer that influences a single activation in this hidden layer
-    patch_range = deconvolve_range((0, 0), filt_size=7, stride=4, pad=0)
-    patch_size = patch_range[1] - patch_range[0] + 1
-    for f in range(96):
-        activations = first_hidden_layer[:, :, :, f]
-        # the 9 image patches will be pasted together into one "composite" image
-        composite_grid_size = math.ceil(math.sqrt(top_n))
-        composite_pixel_size = (patch_size + 1) * composite_grid_size
-        # make the background white
-        composite_img = np.full((composite_pixel_size, composite_pixel_size), 255)
-        # make the bottom right corner pixel black. this is a hack to make sure the whole grayscale is present in the image
-        composite_img[composite_pixel_size - 1, composite_pixel_size - 1] = 0
-
-        kernel_argmax = largest_indices(activations, top_n)
-        kernel_max_values = activations[kernel_argmax]
-
-        for m in range(top_n):
-            val = kernel_max_values[m]
-            # if 0 is the max activation, we know we just need all white
-            if val == 0:
-                patch = np.full((patch_size, patch_size), 255)
-            else:
-                loc = [t[m] for t in kernel_argmax]
-                i = loc[0]
-                j = deconvolve_range((loc[1], loc[1]), 7, 4)
-                k = deconvolve_range((loc[2], loc[2]), 7, 4)
-                patch = np.squeeze(imgs[i, j[0]:j[1]+1, k[0]:k[1]+1])
-                x, y = np.unravel_index(m, (composite_grid_size, composite_grid_size))
-                # patches on the edge might be too small. pad to make sure they are the right size
-                patch = np.pad(patch, ((0, patch_size - patch.shape[0]), (0, patch_size - patch.shape[1])), "constant", constant_values=128)
-            # add the patch to the composite image
-            composite_img[x*(patch_size + 1):x*(patch_size + 1)+patch_size,
-                          y*(patch_size + 1):y*(patch_size + 1)+patch_size] = patch
-        sub = fig1.add_subplot(12, 8, f + 1)
-        sub.imshow(composite_img, cmap="gray")
-    fig1.savefig('readme-img/layer1.png')
-
-    fig2 = plt.figure(figsize=(9, 72))
-    def deconvolve_all(rng, ignore_pad=False):
+    def deconvolve_layer_2(rng, ignore_pad=False):
         patch_range = deconvolve_range(rng, filt_size=5, stride=1, pad=(0 if ignore_pad else 2))
         patch_range = deconvolve_range(patch_range, 3, 2)
         return deconvolve_range(patch_range, 7, 4)
-    patch_range = deconvolve_all((0, 0), True)
-    patch_size = patch_range[1] - patch_range[0] + 1
-    for f in range(256):
-        activations = second_hidden_layer[:, :, :, f]
-        composite_grid_size = math.ceil(math.sqrt(top_n))
-        composite_pixel_size = (patch_size + 1) * composite_grid_size
-        composite_img = np.full((composite_pixel_size, composite_pixel_size), 255)
-        composite_img[composite_pixel_size - 1, composite_pixel_size - 1] = 0
-        kernel_argmax = largest_indices(activations, top_n)
-        kernel_max_values = activations[kernel_argmax]
-        for m in range(top_n):
-            val = kernel_max_values[m]
-            if val == 0:
-                patch = np.full((patch_size, patch_size), 255)
-            else:
-                loc = [t[m] for t in kernel_argmax]
-                i = loc[0]
-                j = deconvolve_all((loc[1], loc[1]))
-                k = deconvolve_all((loc[2], loc[2]))
-                patch = np.squeeze(imgs[i, j[0]:j[1]+1, k[0]:k[1]+1])
-                x, y = np.unravel_index(m, (composite_grid_size, composite_grid_size))
-                patch = np.pad(patch, ((0, patch_size - patch.shape[0]), (0, patch_size - patch.shape[1])), "constant", constant_values=128)
-            composite_img[x*(patch_size + 1):x*(patch_size + 1)+patch_size,
-                          y*(patch_size + 1):y*(patch_size + 1)+patch_size] = patch
-        sub = fig2.add_subplot(43, 6, f + 1)
-        sub.imshow(composite_img, cmap="gray")
-    fig2.savefig('readme-img/layer2.png')
+
+    def deconvolve_layer_3(rng, ignore_pad=False):
+        patch_range = deconvolve_range(rng, filt_size=3, stride=1, pad=(0 if ignore_pad else 1))
+        patch_range = deconvolve_range(patch_range, 3, 2)
+        patch_range = deconvolve_range(patch_range, 5, 1, (0 if ignore_pad else 2))
+        patch_range = deconvolve_range(patch_range, 3, 2)
+        return deconvolve_range(patch_range, 7, 4)
+
+    visualize_layer(first_hidden_layer, 1, deconvolve_layer_1, figsize=(9, 13), subplot_layout=(12, 8))
+    visualize_layer(second_hidden_layer, 2, deconvolve_layer_2, figsize=(9, 70), subplot_layout=(43, 6))
+    visualize_layer(third_hidden_layer, 3, deconvolve_layer_3, figsize=(9, 200), subplot_layout=(96, 4))
 
 
