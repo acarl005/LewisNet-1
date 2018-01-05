@@ -36,7 +36,7 @@ This was done with a Chrome Extension called [Label Gun](https://github.com/acar
 
 ## Training
 
-The network was trained on a 2015 Macbook Pro with an Intel i7 CPU.
+The network was trained on a Lenovo U31-70 with a NVIDIA GeForce 920M running Ubuntu 16.04.3.
 
 ## Hidden Layer Visualizations
 
