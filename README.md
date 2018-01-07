@@ -39,6 +39,11 @@ This was done with a Chrome Extension called [Label Gun](https://github.com/acar
 
 The network was trained on a Lenovo U31-70 with a NVIDIA GeForce 920M running Ubuntu 16.04.3.
 
+## Failure Cases
+
+Among the training data, the most common false positives are from drawings of "stick figure" people, and physics diagrams such as circuits or Feynman diagrams.
+False negatives seem to occur when the molecule in the image is too zoomed out or too small.
+
 ## Hidden Layer Visualizations
 
 I'm using a technique from [Donahue et. al., 2013](https://arxiv.org/pdf/1310.1531.pdf).
