@@ -1,8 +1,7 @@
 import tensorflow as tf
 import numpy as np
-np.set_printoptions(threshold=np.inf)
 from matplotlib import pyplot as plt
-import math
+from math import ceil, sqrt
 
 from alexnet import AlexNet
 from image_loader import load_images
@@ -35,7 +34,7 @@ def visualize_layer(hidden_layer, layer_number, deconvolve, figsize, subplot_lay
         # get activations for the filter/channel we care about
         activations = hidden_layer[:, :, :, f]
         # the composite image is the 9 crops of the images put together into a single image. makes plotting easier
-        composite_grid_size = math.ceil(math.sqrt(top_n))
+        composite_grid_size = ceil(sqrt(top_n))
         composite_pixel_size = (patch_size + 1) * composite_grid_size
         composite_img = np.full((composite_pixel_size, composite_pixel_size), 255)
         composite_img[composite_pixel_size - 1, composite_pixel_size - 1] = 0
@@ -71,12 +70,15 @@ def visualize_layer(hidden_layer, layer_number, deconvolve, figsize, subplot_lay
 num_classes = 1
 
 X = tf.placeholder(tf.float32, shape=(None, 150, 150, 1))
-Y = tf.placeholder(tf.float32, shape=(None, num_classes))
-dropout = tf.placeholder(tf.float32)
+dropout = tf.constant(0)
 
 model = AlexNet(X, dropout, num_classes)
 
-predictions = model.logits > 0
+graph = tf.get_default_graph()
+# from our graph, get the tensors for our hidden layers
+first_hidden_layer_tensor = graph.get_tensor_by_name("conv1/Relu:0")
+second_hidden_layer_tensor = graph.get_tensor_by_name("conv2/Relu:0")
+third_hidden_layer_tensor = graph.get_tensor_by_name("conv3/Relu:0")
 
 saver = tf.train.Saver()
 
@@ -88,16 +90,10 @@ imgs = load_images([
 with tf.Session() as sess:
     saver.restore(sess, "./tensorflow-ckpt/model.ckpt")
 
-    graph = tf.get_default_graph()
-    # from our graph, get the tensors for our hidden layers
-    first_hidden_layer_tensor = graph.get_tensor_by_name("conv1/Relu:0")
-    second_hidden_layer_tensor = graph.get_tensor_by_name("conv2/Relu:0")
-    third_hidden_layer_tensor = graph.get_tensor_by_name("conv3/Relu:0")
-
     first_hidden_layer, second_hidden_layer, third_hidden_layer = sess.run((first_hidden_layer_tensor,
                                                                             second_hidden_layer_tensor,
                                                                             third_hidden_layer_tensor),
-                                                                           feed_dict={X: imgs, dropout: 0})
+                                                                           feed_dict={X: imgs})
 
     def deconvolve_layer_1(rng, ignore_pad=False):
         return deconvolve_range(rng, filt_size=7, stride=4)
